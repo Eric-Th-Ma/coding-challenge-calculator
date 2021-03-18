@@ -29,7 +29,6 @@ class StateItem {
     splitOnDecimal() {
         let newItem = new StateItem('0')
         if (this.buttonType === buttonTypes.NUMBER) {
-            console.log(this.val.toString())
             let valueList = this.val.toString().split('.')
             if (valueList.length>1) {
                 this.val = parseInt(valueList[0])
