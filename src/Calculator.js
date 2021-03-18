@@ -1,11 +1,9 @@
 import React, { Component } from "react";
 import CalcButton from './CalcButton.js'
 import Display from './Display.js';
-import evaluateState from './evaluateState,js';
+import evaluateState from './evaluateState.js';
 
 const rowLength = 5
-
-const operationOrder = [['x','÷'],['+','-']]
 
 export default class Calculator extends Component {
     constructor(props) {
@@ -18,7 +16,8 @@ export default class Calculator extends Component {
         this.op = this.op.bind(this)
         this.evaluate = this.evaluate.bind(this)
 
-        this.buttonsList = [{char: '1', action: () => this.updateNum(1)},
+        this.buttonsList = [{char: 'AC', action: () => this.setState({displayStatus: [0]})},
+                            {char: '1', action: () => this.updateNum(1)},
                             {char: '2', action: () => this.updateNum(2)},
                             {char: '3', action: () => this.updateNum(3)},
                             {char: '+', action: () => this.op('+')},
@@ -31,7 +30,9 @@ export default class Calculator extends Component {
                             {char: '7', action: () => this.updateNum(7)},
                             {char: '8', action: () => this.updateNum(8)},
                             {char: '9', action: () => this.updateNum(9)},
-                            {char: '=', action: this.evaluate}];
+                            {char: '.', action: () => this.op('.')},
+                            {char: '=', action: this.evaluate},
+                            {char: '0', action: () => this.updateNum(0)}];
     }
 
     updateNum(val) {
@@ -41,20 +42,21 @@ export default class Calculator extends Component {
         } else {
             newStatus.push(val)
         }
-        this.setState({calculatorState: newStatus})
+        this.setState({displayStatus: newStatus})
     }
 
     op(operator) {
         let newStatus = this.state.displayStatus
-        if (typeof newStatus[newStatus.length-1] == 'number') {
+        if (typeof newStatus[newStatus.length-1] == 'number' && (operator !== '.' || newStatus[newStatus.length-2] !== '.')) {
             newStatus.push(operator)
-            this.setState({calculatorState: newStatus})
+            this.setState({displayStatus: newStatus})
         }
     }
 
     evaluate() {
         if (typeof this.state.displayStatus[this.state.displayStatus.length-1] == 'number') { 
-            this.setState({calculatorState: evaluateState(this.state.displayStatus)})
+            let result = evaluateState(this.state.displayStatus)
+            this.setState({displayStatus: result})
         }
     }
 
@@ -67,11 +69,12 @@ export default class Calculator extends Component {
             <div>
                 <div><Display displayStatus = {this.state.displayStatus}/></div>
                 {rows.map(row => (
-                    <div>
+                    <div key = {"row of " + row[0].char}>
                         {row.map(buttonInfo => (
                             <CalcButton
                                 char = {buttonInfo.char}
                                 action = {buttonInfo.action}
+                                key = {buttonInfo.char}
                             />
                         ))}
                     </div>
