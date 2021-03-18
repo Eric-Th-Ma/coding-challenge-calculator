@@ -55,8 +55,10 @@ export default class Calculator extends Component {
             rows[i] = allButtons.slice(i, i+rowLength);
         }
         return(
-            <div>
-                <div><Display displayStatus = {this.state.displayStatus}/></div>
+            <div className = "calculator">
+                <div>
+                    <Display displayStatus = {this.state.displayStatus}/>
+                </div>
                 {rows.map(row => (
                     <div key = {"row of " + row[0]}>
                         {row.map(buttonChar => (
