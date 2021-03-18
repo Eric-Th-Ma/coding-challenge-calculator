@@ -1,36 +1,11 @@
-const buttonTypes = {
-    NUMBER: 'number',
-    BINOP: {REG: "binop.regular",
-            DEC: "binop.decimal"},
-    PAREN: {C: "paren.close",
-            O: "paren.open"},
-}
+import {buttonTypes, StateItem} from './stateItem.js'
 
-const buttons = {
-    'AC': null,
-    '(' : buttonTypes.PAREN.O,
-    ')' : buttonTypes.PAREN.C,
-    'Copy': null,
-    'Paste': null,
-    '1' : buttonTypes.NUMBER,
-    '2' : buttonTypes.NUMBER,
-    '3' : buttonTypes.NUMBER,
-    '+' : buttonTypes.BINOP.REG,
-    '-' : buttonTypes.BINOP.REG,
-    '4' : buttonTypes.NUMBER,
-    '5' : buttonTypes.NUMBER,
-    '6' : buttonTypes.NUMBER,
-    'x' : buttonTypes.BINOP.REG,
-    '÷' : buttonTypes.BINOP.REG,
-    '7' : buttonTypes.NUMBER,
-    '8' : buttonTypes.NUMBER,
-    '9' : buttonTypes.NUMBER,
-    '.' : buttonTypes.BINOP.DEC,
-    '=' : null,
-    '0' : buttonTypes.NUMBER,
-}
+const operationOrder = [['.'],
+                        ['(', ')'],
+                        ['x', '÷'],
+                        ['+', '-']]
 
-class StateList {
+export default class StateList {
     constructor() {
         this.listItems = [new StateItem('0')]
     }
@@ -58,7 +33,7 @@ class StateList {
                 canAdd = (canAdd && lastType === buttonTypes.NUMBER)
                 break
             case buttonTypes.PAREN.O:
-                if (this === new StateList('0')) {
+                if (this.listItems[0].val === 0 && this.listItems.length === 1) {
                     this.listItems = [newItem]
                 } else {
                     canAdd = (Object.values(buttonTypes.BINOP).includes(lastType) || lastType === buttonTypes.PAREN.O)
@@ -83,15 +58,75 @@ class StateList {
             this.listItems.push(newItem)
         }
     }
-}
 
-class StateItem {
-    constructor(char) {
-        console.log(char)
-        this.buttonType = buttons[char]
-        this.val = (this.buttonType===buttonTypes.NUMBER) ? parseInt(char) : char
-        console.log(this.val)
+    evaluate() {
+        for (let operations of operationOrder) {
+            for (let i = 0; i < this.listItems.length; i++) {
+                if (operations.includes(this.listItems[i].val)) {
+                    let currentItem = this.listItems[i]
+                    // if this is a binary operation we will evaluate it and overwrite three terms with the result
+                    if (Object.values(buttonTypes.BINOP).includes(currentItem.buttonType)) {
+                        this.evalBinOp(i)
+                        i-=1
+                    // if this is a parenthetical we will evaluate the whole thing and then enter the result in its place
+                    } else if (this.listItems[i].val==='(') {
+                        let evaluationSuccess = this.evalParen(i)
+                        if (!evaluationSuccess) {
+                            this.listItems = [new StateItem('NaN')]
+                        }
+                    }
+                }
+            }
+        }
+        // round early enough to avoid floating point errors
+        this.listItems[0].val = Math.round(this.listItems[0].val*1000000000)/1000000000
+        /*let splitRight = this.listItems[0].splitOnDecimal()
+        if (splitRight !== new StateItem('0')) {
+            this.listItems.push(new StateItem('.'))
+            this.listItems.push(splitRight)
+        }*/
+    }
+
+    evalBinOp(index) {
+        let left = this.listItems[index-1].val
+        let op = this.listItems[index].val
+        let right = this.listItems[index+1].val
+        let result = new StateItem('0')
+        switch(op) {
+            case '+':
+                result.val = left+right
+                break
+            case '-':
+                result.val = left-right
+                break
+            case 'x':
+                result.val = left*right
+                break
+            case '÷':
+                result.val = left/right
+                break
+            case '.':
+                let decimalValue = (left > 0) ? right / 10**right.toString().length : 0 - right / 10**right.toString().length
+                result.val = left + decimalValue
+                break
+            default:
+                result.val = 0
+                break
+        }
+        this.listItems.splice(index-1, 3, result)
+    }
+
+    evalParen(i) {
+        for (let j = i; j < this.listItems.length; j++) {
+            if (this.listItems[j].val===')') {
+                let innerState = new StateList()
+                innerState.listItems = this.listItems.slice(i+1,j)
+                innerState.evaluate()
+                this.listItems.splice(i,j-i+1,innerState.listItems[0])
+                return true
+            }
+        }
+        // if we could not find a closing paren we return false
+        return false
     }
 }
-
-export {buttonTypes, StateItem, StateList}
