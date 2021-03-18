@@ -1,6 +1,7 @@
 import './App.css';
 import Calculator from './Calculator.js';
 
+// container for the entire calculator app
 function App() {
   return (
     <div className="App">

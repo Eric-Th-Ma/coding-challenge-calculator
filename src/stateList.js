@@ -87,39 +87,61 @@ export default class StateList {
 
     evaluate() {
         console.log(this.listItems.map(x=>x))
-        for (let operations of operationOrder) {
-            for (let i = 0; i < this.listItems.length; i++) {
-                if (operations.includes(this.listItems[i].val)) {
-                    let currentItem = this.listItems[i]
-                    // if this is a binary operation we will evaluate it and overwrite three terms with the result
-                    if (Object.values(buttonTypes.BINOP).includes(currentItem.buttonType)) {
-                        this.evalBinOp(i)
-                        i-=1
-                    // if this is a parenthetical we will evaluate the whole thing and then enter the result in its place
-                    } else if (this.listItems[i].val==='(') {
-                        let evaluationSuccess = this.evalParen(i)
-                        if (!evaluationSuccess) {
-                            this.listItems = [new StateItem('NaN')]
+        // only evaluate if the final entry is a number, or close paren, and all open parentheses are closed
+        let lastType = this.listItems[this.listItems.length-1].buttonType
+        let openCount = 0
+        for (let item of this.listItems) {
+            if (item.buttonType === buttonTypes.PAREN.O) {
+                openCount += 1
+            } else if (item.buttonType === buttonTypes.PAREN.C) {
+                openCount -= 1
+            }
+        }
+        if ((lastType === buttonTypes.NUMBER || lastType === buttonTypes.PAREN.C) && openCount === 0)
+            for (let operations of operationOrder) {
+                // in each layer of the order of operations check from left to right for the operation and evaluate it
+
+                for (let i = 0; i < this.listItems.length; i++) {
+                    if (operations.includes(this.listItems[i].val)) {
+
+                        let currentItem = this.listItems[i]
+                        // if this is a binary operation we will evaluate it and overwrite three terms with the result
+                        if (Object.values(buttonTypes.BINOP).includes(currentItem.buttonType)) {
+                            this.evalBinOp(i)
+                            i-=1
+                            
+                        // if this is a parenthetical we will evaluate the whole thing and then enter the result in its place
+                        } else if (this.listItems[i].val==='(') {
+                            let evaluationSuccess = this.evalParen(i)
+                            if (!evaluationSuccess) {
+                                this.listItems = [new StateItem('NaN')]
+                            }
                         }
                     }
                 }
             }
-        }
-        // round early enough to avoid floating point errors
-        this.listItems[0].val = Math.round(this.listItems[0].val*1000000000)/1000000000
-        let splitRight = this.listItems[0].splitOnDecimal()
-        if (splitRight.val !== 0) {
-            this.listItems.push(new StateItem('.'))
-            this.listItems.push(splitRight)
-        }
+            // round early enough to avoid floating point errors
+            this.listItems[0].val = Math.round(this.listItems[0].val*1000000000)/1000000000
+
+            // split decimal numbers to avoid adding decimal points to already decimal numbers
+            let splitRight = this.listItems[0].splitOnDecimal()
+            if (splitRight.val !== 0) {
+                this.listItems.push(new StateItem('.'))
+                this.listItems.push(splitRight)
+            }
     }
 
     evalBinOp(index) {
+        // evaluate and replace binary operation located at index in listItems
+
         let left = this.listItems[index-1].val
         let op = this.listItems[index].val
         let right = this.listItems[index+1].val
+
         let result = new StateItem('0')
         switch(op) {
+
+            // basic arithmetic operations
             case '+':
                 result.val = left+right
                 break
@@ -132,38 +154,49 @@ export default class StateList {
             case '÷':
                 result.val = left/right
                 break
+
             case '.':
+                // decimal value must agree with the sign of the whole value
                 let decimalValue = (left > 0) ? right / 10**right.toString().length : 0 - right / 10**right.toString().length
+
                 result.val = left + decimalValue
                 break
             default:
                 result.val = 0
                 break
         }
+        // replace left hand side, right hand side and binary operation with their evaluation
         this.listItems.splice(index-1, 3, result)
     }
 
     evalParen(i) {
+        // evaluate inside of parentheses starting at i and insert the evaluation in its place in listItems
+
+        // count open parens to find close paren that closes off i
         let openParens = 0
         for (let j = i; j < this.listItems.length; j++) {
+            // begining at i search for the correct close paren
+
             if (this.listItems[j].val==='(') {
                 openParens += 1
             }
+
             if (this.listItems[j].val===')') {
                 if (openParens === 1) {
+                    // once found, copy the section with the parentheses and evaluate it
                     let innerState = new StateList()
                     innerState.listItems = this.listItems.slice(i+1,j)
-                    console.log(innerState.listItems)
                     innerState.evaluate()
-                    console.log(innerState.listItems[0])
-                    this.listItems.splice(i,j-i+1,innerState.listItems[0])
+
+                    // insert the result in place of the entire parenthetical
+                    this.listItems.splice(i, j-i+1, ...innerState.listItems)
                     return true
                 } else {
                     openParens -= 1
                 }
             }
         }
-        // if we could not find a closing paren we return false
+        // if we could not find the closing paren we return false
         return false
     }
 

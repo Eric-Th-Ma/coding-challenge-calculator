@@ -1,3 +1,4 @@
+// types of state items can be numbers, binary operations or parentheses
 const buttonTypes = {
     NUMBER: 'number',
     BINOP: {REG: "binop.regular",
@@ -6,6 +7,7 @@ const buttonTypes = {
             O: "paren.open"},
 }
 
+// for lookup of types of nonumeric symbols
 const buttons = {
     '(' : buttonTypes.PAREN.O,
     ')' : buttonTypes.PAREN.C,
@@ -18,6 +20,8 @@ const buttons = {
 
 class StateItem {
     constructor(char) {
+        // take char or string representing a state item and find its type and value
+
         if (char in buttons) {
             this.buttonType = buttons[char]
         } else {
@@ -27,12 +31,19 @@ class StateItem {
     }
 
     splitOnDecimal() {
+        // once evaluated any decimal value will need to converted back into its whole part, 
+        // the decimal operation, and its decimal part. This prevents adding a decimal point
+        // to an already fractional number
+
         let newItem = new StateItem('0')
         if (this.buttonType === buttonTypes.NUMBER) {
+            // convert to string and split on the decimal point
             let valueList = this.val.toString().split('.')
+
+            // if split did anything record this by returning the decimal part and truncating this item
             if (valueList.length>1) {
                 this.val = parseInt(valueList[0])
-                newItem = parseInt(valueList[2])
+                newItem.val = parseInt(valueList[1])
             }
         }
         return newItem
