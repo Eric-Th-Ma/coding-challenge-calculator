@@ -17,7 +17,9 @@ export default class StateList {
         switch (newItem.buttonType) {
             case buttonTypes.NUMBER:
                 if (lastType === buttonTypes.NUMBER) {
-                    this.listItems[this.listItems.length-1].val = this.listItems[this.listItems.length-1].val*10 + newItem.val
+                    this.listItems[this.listItems.length-1].val *= 10
+                    let adder = this.listItems[this.listItems.length-1].val<0 ? 0 - newItem.val : newItem.val
+                    this.listItems[this.listItems.length-1].val += adder
                 } else {
                     canAdd = (Object.values(buttonTypes.BINOP).includes(lastType) || lastType === buttonTypes.PAREN.O)
                 }
@@ -57,6 +59,7 @@ export default class StateList {
         if (canAdd) {
             this.listItems.push(newItem)
         }
+        return canAdd
     }
 
     evaluate() {
@@ -80,11 +83,11 @@ export default class StateList {
         }
         // round early enough to avoid floating point errors
         this.listItems[0].val = Math.round(this.listItems[0].val*1000000000)/1000000000
-        /*let splitRight = this.listItems[0].splitOnDecimal()
-        if (splitRight !== new StateItem('0')) {
+        let splitRight = this.listItems[0].splitOnDecimal()
+        if (splitRight.val !== 0) {
             this.listItems.push(new StateItem('.'))
             this.listItems.push(splitRight)
-        }*/
+        }
     }
 
     evalBinOp(index) {
@@ -128,5 +131,18 @@ export default class StateList {
         }
         // if we could not find a closing paren we return false
         return false
+    }
+
+    joinWith(otherStateList) {
+        console.log(this.listItems)
+        // Copy our list items so we can see if joing will work without modifying our state
+        let selfCopy = new StateList()
+        selfCopy.listItems = this.listItems.map(x=>x)
+        // If one join works then join all, otherwise do nothing
+        if (selfCopy.tryAddItem(otherStateList.listItems[0].val.toString())) {
+            for (let item of otherStateList.listItems) {
+                this.tryAddItem(item.val.toString())
+            }
+        }
     }
 }

@@ -7,39 +7,29 @@ const buttonTypes = {
 }
 
 const buttons = {
-    'AC': null,
     '(' : buttonTypes.PAREN.O,
     ')' : buttonTypes.PAREN.C,
-    'Copy': null,
-    'Paste': null,
-    '1' : buttonTypes.NUMBER,
-    '2' : buttonTypes.NUMBER,
-    '3' : buttonTypes.NUMBER,
     '+' : buttonTypes.BINOP.REG,
     '-' : buttonTypes.BINOP.REG,
-    '4' : buttonTypes.NUMBER,
-    '5' : buttonTypes.NUMBER,
-    '6' : buttonTypes.NUMBER,
     'x' : buttonTypes.BINOP.REG,
     '÷' : buttonTypes.BINOP.REG,
-    '7' : buttonTypes.NUMBER,
-    '8' : buttonTypes.NUMBER,
-    '9' : buttonTypes.NUMBER,
     '.' : buttonTypes.BINOP.DEC,
-    '=' : null,
-    '0' : buttonTypes.NUMBER,
-    'NaN' : buttonTypes.NUMBER
 }
 
 class StateItem {
     constructor(char) {
-        this.buttonType = buttons[char]
+        if (char in buttons) {
+            this.buttonType = buttons[char]
+        } else {
+            this.buttonType = buttonTypes.NUMBER
+        }
         this.val = (this.buttonType===buttonTypes.NUMBER) ? parseInt(char) : char
     }
 
-    /*splitOnDecimal() {
+    splitOnDecimal() {
         let newItem = new StateItem('0')
         if (this.buttonType === buttonTypes.NUMBER) {
+            console.log(this.val.toString())
             let valueList = this.val.toString().split('.')
             if (valueList.length>1) {
                 this.val = parseInt(valueList[0])
@@ -47,7 +37,7 @@ class StateItem {
             }
         }
         return newItem
-    }*/
+    }
 }
 
 export {buttonTypes, StateItem}
