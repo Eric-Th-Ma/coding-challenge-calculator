@@ -10,13 +10,17 @@ export default class Calculator extends Component {
 
         super(props);
 
-        this.state = {displayStatus: [0]}
+        this.state = {displayStatus: [0], memory: []}
 
         this.updateNum = this.updateNum.bind(this)
         this.op = this.op.bind(this)
         this.evaluate = this.evaluate.bind(this)
 
         this.buttonsList = [{char: 'AC', action: () => this.setState({displayStatus: [0]})},
+                            {char: '(', action: () => this.paren(true)},
+                            {char: ')', action: () => this.paren(false)},
+                            {char: 'Copy', action: () => this.setState({memory: this.state.displayStatus})},
+                            {char: 'Paste', action: () => this.setState({displayStatus: this.state.displayStatus.concat(this.state.memory)})},
                             {char: '1', action: () => this.updateNum(1)},
                             {char: '2', action: () => this.updateNum(2)},
                             {char: '3', action: () => this.updateNum(3)},
@@ -47,7 +51,10 @@ export default class Calculator extends Component {
 
     op(operator) {
         let newStatus = this.state.displayStatus
-        if (typeof newStatus[newStatus.length-1] == 'number' && (operator !== '.' || newStatus[newStatus.length-2] !== '.')) {
+        let numLast = typeof newStatus[newStatus.length-1] == 'number'
+        let closeParen = newStatus[newStatus.length-1] === ')'
+        let decimalAllowed = (operator !== '.' || (newStatus[newStatus.length-2] !== '.' && newStatus[newStatus.length-1] !== ')'))
+        if ((numLast || closeParen) && decimalAllowed) {
             newStatus.push(operator)
             this.setState({displayStatus: newStatus})
         }
@@ -58,6 +65,20 @@ export default class Calculator extends Component {
             let result = evaluateState(this.state.displayStatus)
             this.setState({displayStatus: result})
         }
+    }
+
+    paren(open) {
+        let newStatus = this.state.displayStatus
+        if (typeof newStatus[newStatus.length-1] == 'number') {
+            if (!open) {
+                newStatus.push(')')
+            }
+        } else if (open && newStatus[newStatus.length-1] !== '.') {
+            newStatus.push('(')
+        } else if (open && newStatus === [0]) {
+            newStatus = ['(',0]
+        }
+        this.setState({displayStatus: newStatus})
     }
 
     render() {
