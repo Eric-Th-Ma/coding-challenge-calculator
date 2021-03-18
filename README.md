@@ -1,4 +1,18 @@
-# Getting Started with Create React App
+# Overview
+
+This project is for the Tutorfly internship coding challenge. It is a functioning react application of a calculator. To get started run `yarn start` and go to [http://localhost:3000](http://localhost:3000). Then click any buttons to run the calculator functionality.
+
+Some interesting features I implimented beyond the requirements:
+
+Comprehensive edge case handling: The calculator is designed not to allow the user to input unparseable mistakes. This includes but is not limited to: preventing adding a decimal point when the current number is a decimal, preventing a close paren when there is no open parenthetical to close, preventing back to back operators, preventing pasting (see below) expressions that break any of these rules, preventing a close paren following an operator or an open paren following a number, preventing evaluating an expression with open parentheticals, or one that ends in an operator.
+
+Parentheses and order of operations: The calculator is designed to evaluate any sequence of numbers, operators and parentheses that makes sense. It correctly evaluates expressions by first evaluating parentheses, then multiplication and division, and finally addition and subtraction.
+
+Clear and Delete: As you might expect clear (AC), clears the value on screen to 0. DEL deletes the entire most recent term. If there is only one term it behaves the same as AC.
+
+Copy & Paste: If at any time the user wants to copy what is on the calculator screen they may do so with the copy button. This will be remembered through clearing, and until the next time the user wishes to copy. At any time the user may paste what they have in memory. This will allow the user to more quickly use the calculator and save needed values.
+
+## Credit
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 

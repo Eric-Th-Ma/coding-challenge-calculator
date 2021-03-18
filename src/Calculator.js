@@ -7,7 +7,7 @@ import StateList from './stateList.js';
 const rowLength = 5
 
 // List of all buttons on calculator
-const allButtons = ['AC','(',')','Copy','Paste','1','2','3','+','-','4','5','6','x','÷','7','8','9','.','=','0']
+const allButtons = ['AC','(',')','Copy','Paste','1','2','3','+','-','4','5','6','x','÷','7','8','9','.','=','0','DEL']
 
 // List of buttons that only require a call to addToState
 const addToStateButtons = ['(',')','1','2','3','+','-','4','5','6','x','÷','7','8','9','.','0']
@@ -60,6 +60,15 @@ export default class Calculator extends Component {
                 let newState = this.state.displayStatus
                 newState.joinWith(this.state.memory)
                 this.setState({displayStatus: newState})
+            },
+            'DEL': () => {
+                if (this.state.displayStatus.listItems.length > 1) {
+                    let newState = this.state.displayStatus
+                    newState.listItems.splice(newState.listItems.length-1)
+                    this.setState({displayStatus: newState})
+                } else {
+                    this.setState({displayStatus: new StateList()})
+                }
             }
         }
 
