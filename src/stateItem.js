@@ -5,6 +5,8 @@ const buttonTypes = {
             DEC: "binop.decimal"},
     PAREN: {C: "paren.close",
             O: "paren.open"},
+    UNIOP: 'uniop',
+    CONST: 'constant'
 }
 
 // for lookup of types of nonumeric symbols
@@ -16,6 +18,11 @@ const buttons = {
     'x' : buttonTypes.BINOP.REG,
     '÷' : buttonTypes.BINOP.REG,
     '.' : buttonTypes.BINOP.DEC,
+    'sin' : buttonTypes.UNIOP,
+    'cos' : buttonTypes.UNIOP,
+    'tan' : buttonTypes.UNIOP,
+    'π': buttonTypes.CONST,
+    'e': buttonTypes.CONST
 }
 
 class StateItem {

@@ -12,6 +12,33 @@
   padding: 0.5em;
   border-radius: 0.4em;
   background-color: rgba(5, 0, 46, 0.2);
+  overflow: hidden;
+}
+
+.degDisplay {
+  float: right;
+  font-size: small;
+}
+
+.expressionDisplay {
+  float: left;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  max-width: 90%;
+}
+
+.spacer {
+  margin: 0.75em 3em 0.75em 3em;
+  width: 5em;
+  height: 4em;
+  display: inline-block;
+  font-size: large;
+}
+
+.equals {
+  width: 16em;
+  background-color: orangered;
 }
 
 button {
@@ -21,4 +48,5 @@ button {
   border-radius: 0.3em;
   font-weight: bolder;
   font-size: large;
+  vertical-align: top;
 }

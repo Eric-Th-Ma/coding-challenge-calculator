@@ -7,10 +7,15 @@ import StateList from './stateList.js';
 const rowLength = 5
 
 // List of all buttons on calculator
-const allButtons = ['AC','(',')','Copy','Paste','1','2','3','+','-','4','5','6','x','÷','7','8','9','.','=','0','DEL']
+const allButtons = ['AC','(',')','Copy','Paste',
+                    'DEL','sin','cos','tan','rad/deg',
+                    '1','2','3','+','-',
+                    '4','5','6','x','÷',
+                    '7','8','9','=','=2',
+                    '.','0','','π','e']
 
 // List of buttons that only require a call to addToState
-const addToStateButtons = ['(',')','1','2','3','+','-','4','5','6','x','÷','7','8','9','.','0']
+const addToStateButtons = ['sin','cos','tan','(',')','1','2','3','+','-','4','5','6','x','÷','7','8','9','.','0','π','e']
 
 export default class Calculator extends Component {
     constructor(props) {
@@ -22,7 +27,7 @@ export default class Calculator extends Component {
         this.addToState = this.addToState.bind(this)
 
         // Initialize the state
-        this.state = {displayStatus: new StateList(), memory: new StateList()}
+        this.state = {displayStatus: new StateList(), memory: new StateList(), degrees: true}
     }
 
     evaluate() {
@@ -45,10 +50,11 @@ export default class Calculator extends Component {
         
         // Create object mapping some buttons to their functionality
         let otherButtonFunctions = {
+            'rad/deg': () => this.setState({degrees: !this.state.degrees}),
             'AC': () => this.setState({displayStatus: new StateList()}),
             '=' : () => {
                 let newState = this.state.displayStatus
-                newState.evaluate()
+                newState.evaluate(this.state.degrees)
                 this.setState({displayStatus: newState})
             },
             'Copy': () => {
@@ -81,13 +87,13 @@ export default class Calculator extends Component {
         return(
             <div className = "calculator">
 
-                <Display displayStatus = {this.state.displayStatus}/>
+                <Display displayStatus = {this.state.displayStatus} degrees={this.state.degrees}/>
 
                 {// map each row to a row object filled with buttons
                  rows.map(row => (
                     <div key = {"row of " + row[0]}>
                         {// map each row of button texts to button objects
-                         row.map(buttonChar => (
+                         row.map((buttonChar, idx) => (
                             <CalcButton
                                 char = {buttonChar}
                                 action = {// check if the button requires an addToState call or a function lookup
@@ -95,7 +101,7 @@ export default class Calculator extends Component {
                                           ()=>this.addToState(buttonChar) :
                                           otherButtonFunctions[buttonChar]
                                 }
-                                key = {buttonChar}
+                                key = {buttonChar + idx.toString()}
                             />
                         ))}
                     </div>

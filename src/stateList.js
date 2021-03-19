@@ -1,8 +1,12 @@
 import {buttonTypes, StateItem} from './stateItem.js'
 
+const constVals =  {'π' : Math.PI,
+                    'e' : Math.E}
 // order of operations turning decimals into 1 number first and then following PMDAS
-const operationOrder = [['.'],
+const operationOrder = [['π','e'],
+                        ['.'],
                         ['(', ')'],
+                        ['sin','cos','tan'],
                         ['x', '÷'],
                         ['+', '-']]
 
@@ -13,6 +17,7 @@ export default class StateList {
     }
 
     tryAddItem(itemChar) {
+        console.log(this.listItems.map(x=>x))
         // create a state item out of the character pressed and attempt to add it to the state list
 
         let newItem = new StateItem(itemChar)
@@ -29,14 +34,14 @@ export default class StateList {
                     let adder = this.listItems[this.listItems.length-1].val<0 ? 0 - newItem.val : newItem.val
                     this.listItems[this.listItems.length-1].val += adder
                 } else {
-                    canAdd = (Object.values(buttonTypes.BINOP).includes(lastType) || lastType === buttonTypes.PAREN.O)
+                    canAdd = (Object.values(buttonTypes.BINOP).includes(lastType) || lastType === buttonTypes.PAREN.O || lastType === buttonTypes.UNIOP)
                 }
                 break
 
             case buttonTypes.BINOP.REG:
                 // Regular binary operations can follow any number or closing paren
 
-                canAdd = (lastType === buttonTypes.NUMBER || lastType === buttonTypes.PAREN.C)
+                canAdd = (lastType === buttonTypes.NUMBER || lastType === buttonTypes.PAREN.C || buttonTypes.CONST)
                 break
 
             case buttonTypes.BINOP.DEC:
@@ -50,13 +55,13 @@ export default class StateList {
                 break
 
             case buttonTypes.PAREN.O:
-                // Opening parentheses can follow a regular binary operation or another open paren
+                // Opening parentheses can follow a regular binary operation single variable op or another open paren
 
                 if (this.listItems[0].val === 0 && this.listItems.length === 1) {
                     // They can also replace the opening 0 IF that is all that is in the state list
                     this.listItems = [newItem]
                 } else {
-                    canAdd = (lastType === buttonTypes.BINOP.REG || lastType === buttonTypes.PAREN.O)
+                    canAdd = (lastType === buttonTypes.BINOP.REG || lastType === buttonTypes.PAREN.O || lastType === buttonTypes.UNIOP)
                 }
                 break
 
@@ -72,7 +77,27 @@ export default class StateList {
                         openCount -= 1
                     }
                 }
-                canAdd = ((lastType === buttonTypes.NUMBER || lastType === buttonTypes.PAREN.C) && openCount > 0)
+                canAdd = ((lastType === buttonTypes.NUMBER || lastType === buttonTypes.PAREN.C || lastType === buttonTypes.CONST) && openCount > 0)
+                break
+
+            case buttonTypes.UNIOP:
+                // operations on a singular value can replace a starting 0, or follow any regular binop, open paren, or other UNIOP
+
+                if (this.listItems[0].val === 0 && this.listItems.length === 1) {
+                    this.listItems = [newItem]
+                } else {
+                    canAdd = (lastType === buttonTypes.BINOP.REG || lastType === buttonTypes.PAREN.O || lastType === buttonTypes.UNIOP)
+                }
+                break
+
+            case buttonTypes.CONST:
+                // constants can replace a starting 0, or follow any regular binop, open paren, or other UNIOP
+
+                if (this.listItems[0].val === 0 && this.listItems.length === 1) {
+                    this.listItems = [newItem]
+                } else {
+                    canAdd = (lastType === buttonTypes.BINOP.REG || lastType === buttonTypes.PAREN.O || lastType === buttonTypes.UNIOP)
+                }
                 break
 
             default:
@@ -82,10 +107,11 @@ export default class StateList {
         if (canAdd) {
             this.listItems.push(newItem)
         }
+        console.log(this.listItems.map(x=>x))
         return canAdd
     }
 
-    evaluate() {
+    evaluate(inDegrees) {
         console.log(this.listItems.map(x=>x))
         // only evaluate if the final entry is a number, or close paren, and all open parentheses are closed
         let lastType = this.listItems[this.listItems.length-1].buttonType
@@ -97,7 +123,7 @@ export default class StateList {
                 openCount -= 1
             }
         }
-        if ((lastType === buttonTypes.NUMBER || lastType === buttonTypes.PAREN.C) && openCount === 0)
+        if ((lastType === buttonTypes.NUMBER || lastType === buttonTypes.PAREN.C || lastType === buttonTypes.CONST) && openCount === 0) {
             for (let operations of operationOrder) {
                 // in each layer of the order of operations check from left to right for the operation and evaluate it
 
@@ -116,6 +142,13 @@ export default class StateList {
                             if (!evaluationSuccess) {
                                 this.listItems = [new StateItem('NaN')]
                             }
+                        } else if (currentItem.buttonType === buttonTypes.UNIOP) {
+                            this.evalUniOp(i, inDegrees)
+                        } else if (currentItem.buttonType === buttonTypes.CONST) {
+                            let constItem = new StateItem('0')
+                            console.log(constVals[currentItem.val])
+                            constItem.val = constVals[currentItem.val]
+                            this.listItems[i] = constItem
                         }
                     }
                 }
@@ -129,6 +162,7 @@ export default class StateList {
                 this.listItems.push(new StateItem('.'))
                 this.listItems.push(splitRight)
             }
+        }
     }
 
     evalBinOp(index) {
@@ -167,6 +201,36 @@ export default class StateList {
         }
         // replace left hand side, right hand side and binary operation with their evaluation
         this.listItems.splice(index-1, 3, result)
+    }
+
+    evalUniOp(index, inDegrees) {
+        // evaluate and replace a single operation located at index in listItems
+        
+        let op = this.listItems[index].val
+        let number = this.listItems[index+1].val
+        if (inDegrees) {
+            number = number * Math.PI / 180
+        }
+
+        let result = new StateItem('0')
+        switch(op) {
+
+            // basic trig operations
+            case 'sin':
+                result.val = Math.sin(number)
+                break
+            case 'cos':
+                result.val = Math.cos(number)
+                break
+            case 'tan':
+                result.val = Math.tan(number)
+                break
+            default:
+                result.val = 0
+                break
+        }
+        // replace the operation and operand with their evaluation
+        this.listItems.splice(index, 2, result)
     }
 
     evalParen(i) {
