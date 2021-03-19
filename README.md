@@ -10,7 +10,11 @@ Parentheses and order of operations: The calculator is designed to evaluate any 
 
 Clear and Delete: As you might expect clear (AC), clears the value on screen to 0. DEL deletes the entire most recent term. If there is only one term it behaves the same as AC.
 
+Trig Operations & Constants: The constants for pi and e are buttons so the user may insert them like a number into any expression. Sin, cos, and tangent are implimented, and there is a radian / degree button to switch which angle measure these use.
+
 Copy & Paste: If at any time the user wants to copy what is on the calculator screen they may do so with the copy button. This will be remembered through clearing, and until the next time the user wishes to copy. At any time the user may paste what they have in memory. This will allow the user to more quickly use the calculator and save needed values.
+
+Code that can be easily added to: Due to the implimentation of the stateList and stateItem classes, new functionality can easily be added. Any new binary operators, such as ^ (exponents), % (modulus), C (combinations), P (permutations) etc. can be added to the list of buttons, to the dictionary of operators, to the operation order, and to the evalBinOp function, and voila! It can be used on the calculator. Similarly singular operators such as log10, ln, can be added to these same places with its evaluation in the evalUniOp function and it will work too! operators that do not follow simple op x, or x op y, would require slightly more work, but could also be added with relative ease.
 
 ## Credit
 
