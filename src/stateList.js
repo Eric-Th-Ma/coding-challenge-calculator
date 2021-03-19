@@ -17,7 +17,6 @@ export default class StateList {
     }
 
     tryAddItem(itemChar) {
-        console.log(this.listItems.map(x=>x))
         // create a state item out of the character pressed and attempt to add it to the state list
 
         let newItem = new StateItem(itemChar)
@@ -107,12 +106,10 @@ export default class StateList {
         if (canAdd) {
             this.listItems.push(newItem)
         }
-        console.log(this.listItems.map(x=>x))
         return canAdd
     }
 
     evaluate(inDegrees) {
-        console.log(this.listItems.map(x=>x))
         // only evaluate if the final entry is a number, or close paren, and all open parentheses are closed
         let lastType = this.listItems[this.listItems.length-1].buttonType
         let openCount = 0
@@ -146,7 +143,6 @@ export default class StateList {
                             this.evalUniOp(i, inDegrees)
                         } else if (currentItem.buttonType === buttonTypes.CONST) {
                             let constItem = new StateItem('0')
-                            console.log(constVals[currentItem.val])
                             constItem.val = constVals[currentItem.val]
                             this.listItems[i] = constItem
                         }
