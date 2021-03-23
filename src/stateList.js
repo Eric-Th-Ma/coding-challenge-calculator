@@ -40,7 +40,7 @@ export default class StateList {
             case buttonTypes.BINOP.REG:
                 // Regular binary operations can follow any number or closing paren
 
-                canAdd = (lastType === buttonTypes.NUMBER || lastType === buttonTypes.PAREN.C || buttonTypes.CONST)
+                canAdd = (lastType === buttonTypes.NUMBER || lastType === buttonTypes.PAREN.C || buttonTypes.CONST === lastType)
                 break
 
             case buttonTypes.BINOP.DEC:
