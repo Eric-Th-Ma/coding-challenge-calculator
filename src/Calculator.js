@@ -8,14 +8,15 @@ const rowLength = 5
 
 // List of all buttons on calculator
 const allButtons = ['AC','(',')','Copy','Paste',
-                    'DEL','sin','cos','tan','rad/deg',
-                    '1','2','3','+','-',
-                    '4','5','6','x','÷',
+                    'DEL','e','log10','ln','^',
+                    'rad/deg','π','sin','cos','tan',
+                    '1','2','3','+','x',
+                    '4','5','6','-','÷',
                     '7','8','9','=','=2',
-                    '.','0','','π','e']
+                    '.','0','','','']
 
 // List of buttons that only require a call to addToState
-const addToStateButtons = ['sin','cos','tan','(',')','1','2','3','+','-','4','5','6','x','÷','7','8','9','.','0','π','e']
+const addToStateButtons = ['e','log10','ln','^','sin','cos','tan','(',')','1','2','3','+','-','4','5','6','x','÷','7','8','9','.','0','π']
 
 export default class Calculator extends Component {
     constructor(props) {

@@ -6,13 +6,11 @@ export default function Display(props) {
                 {(props.displayStatus.listItems.map(
                     (item, idx, listItems) => 
                         // under these conditions don't space seperate items
-                        (item.val==='.' || 
-                        item.val==='('  || 
-                        listItems[(idx+1)%listItems.length].val === ')' ||
-                        listItems[(idx+1)%listItems.length].val === '.') ? 
-                            item.val.toString() : 
-                            // otherwise do
-                            item.val.toString()+' '
+                        (item.val==='('  || 
+                        listItems[(idx+1)%listItems.length].val === ')') ? 
+                            item.val : 
+                            // otherwise do space seperate items
+                            item.val+' '
                 )).join('')}
             </div>
             <div className="degDisplay">
