@@ -117,7 +117,6 @@ export default class StateList {
     }
 
     evaluate(inDegrees) {
-        console.log(this.listItems.map(x=>x))
         // only evaluate if the final entry is a number, or close paren, and all open parentheses are closed
         let lastType = this.listItems[this.listItems.length-1].buttonType
         let openCount = 0
@@ -202,6 +201,12 @@ export default class StateList {
         
         let op = this.listItems[index].val
         let number = parseFloat(this.listItems[index+1].val)
+        
+        while (isNaN(number)) {
+            this.evalUniOp(index+1,inDegrees)
+            number = parseFloat(this.listItems[index+1].val)
+        }
+
         if (inDegrees && trigOps.includes(op)) {
             number = number * Math.PI / 180
         }
