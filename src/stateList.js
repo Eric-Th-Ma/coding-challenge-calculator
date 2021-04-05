@@ -270,6 +270,10 @@ export default class StateList {
     }
 
     joinWith(otherStateList) {
+        // if there is a starting 0 then replace it
+        if (this.listItems[0].val === '0' && this.listItems.length === 1) {
+            this.listItems = otherStateList.listItems
+        }
         // Copy our list items so we can see if joing will work without modifying our state
         let selfCopy = new StateList()
         selfCopy.listItems = this.listItems.map(x=>x)
