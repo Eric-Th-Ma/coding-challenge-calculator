@@ -54,7 +54,7 @@ export default class StateList {
                 // If so they are added to that item, not as a new item
 
                 if (lastType === buttonTypes.NUMBER) {
-                    if (!lastType.includes('.')) {
+                    if (!this.listItems[this.listItems.length-1].val.includes('.')) {
                         this.listItems[this.listItems.length-1].val += newItem.val
                     }
                 }
